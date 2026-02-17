@@ -19,6 +19,8 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayEntries, setDayEntries] = useState<Entry[]>([]);
   const [formState, setFormState] = useState<'closed' | 'new' | { edit: Entry }>('closed');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const refreshDates = useCallback(async () => {
     const set = await getDatesWithEntries();
@@ -46,6 +48,7 @@ export default function App() {
   const handleCloseDay = () => {
     setSelectedDate(null);
     setFormState('closed');
+    setErrorMessage(null);
   };
 
   const handleOpenNewEntry = () => {
@@ -57,25 +60,38 @@ export default function App() {
   };
 
   const handleSaveEntry = async (entry: Entry) => {
-    if (entry.id && dayEntries.some((e) => e.id === entry.id)) {
-      await dbUpdateEntry(entry);
-    } else {
-      await dbAddEntry(entry);
+    setSaving(true);
+    setErrorMessage(null);
+    try {
+      if (entry.id && dayEntries.some((e) => e.id === entry.id)) {
+        await dbUpdateEntry(entry);
+      } else {
+        await dbAddEntry(entry);
+      }
+      await refreshDates();
+      if (selectedDate && toDateKey(selectedDate) === entry.date) {
+        setDayEntries(await getEntriesByDate(entry.date));
+      }
+      setFormState('closed');
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Fehler beim Speichern.');
+    } finally {
+      setSaving(false);
     }
-    await refreshDates();
-    if (selectedDate && toDateKey(selectedDate) === entry.date) {
-      setDayEntries(await getEntriesByDate(entry.date));
-    }
-    setFormState('closed');
   };
 
   const handleDeleteEntry = async (id: string) => {
-    await dbDeleteEntry(id);
-    await refreshDates();
-    if (selectedDate) {
-      setDayEntries(await getEntriesByDate(toDateKey(selectedDate)));
+    setErrorMessage(null);
+    try {
+      await dbDeleteEntry(id);
+      await refreshDates();
+      if (selectedDate) {
+        setDayEntries(await getEntriesByDate(toDateKey(selectedDate)));
+      }
+      setFormState('closed');
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Fehler beim Löschen.');
     }
-    setFormState('closed');
   };
 
   const formDate = selectedDate ?? new Date();
@@ -84,7 +100,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">Essens-Kalender</h1>
+        <h1 className="app-title">Medos Essens-Kalender</h1>
       </header>
       <main className="app-main">
         <Calendar
@@ -106,12 +122,26 @@ export default function App() {
             className="modal-panel day-detail-panel"
             onClick={(e) => e.stopPropagation()}
           >
+            {errorMessage && (
+              <div className="app-error" role="alert">
+                {errorMessage}
+                <button
+                  type="button"
+                  className="app-error-dismiss"
+                  onClick={() => setErrorMessage(null)}
+                  aria-label="Fehlermeldung schließen"
+                >
+                  ×
+                </button>
+              </div>
+            )}
             {formState !== 'closed' ? (
               <EntryForm
                 initialDate={formDate}
                 entry={editingEntry}
                 onSave={handleSaveEntry}
                 onCancel={() => setFormState('closed')}
+                saving={saving}
               />
             ) : (
               <DayDetail

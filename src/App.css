@@ -8,18 +8,22 @@
 }
 
 .app-header {
-  padding: 1rem 1.25rem;
-  background: var(--header-bg);
+  padding: 1.5rem 1.5rem 1.35rem;
+  background: linear-gradient(180deg, var(--header-bg) 0%, var(--header-bg-dark) 100%);
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 4px 24px var(--shadow-soft);
+  border-bottom: 1px solid var(--header-border);
 }
 
 .app-title {
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-align: center;
+  color: var(--header-text);
 }
 
 .app-main {
@@ -28,12 +32,41 @@
   margin: 0 auto;
 }
 
+.app-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(139, 58, 58, 0.15);
+  color: #7C2D2D;
+  border-radius: 14px;
+  font-size: 0.875rem;
+}
+
+.app-error-dismiss {
+  flex-shrink: 0;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-error-dismiss:hover {
+  opacity: 0.8;
+}
+
 /* Calendar */
 .calendar {
   background: var(--card-bg);
-  border-radius: 16px;
-  padding: 1rem;
-  box-shadow: 0 2px 12px var(--shadow);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 24px var(--shadow-soft), 0 1px 3px var(--shadow);
 }
 
 .calendar-header {
@@ -52,7 +85,7 @@
   background: var(--btn-bg);
   color: var(--text);
   font-size: 1.5rem;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -63,6 +96,7 @@
 .calendar-nav:hover,
 .calendar-nav:focus-visible {
   background: var(--btn-hover);
+  transform: scale(1.02);
 }
 
 .calendar-title {
@@ -104,7 +138,7 @@
   background: var(--day-bg);
   color: var(--text);
   font-size: 0.9375rem;
-  border-radius: 10px;
+  border-radius: 14px;
   cursor: pointer;
   position: relative;
   -webkit-tap-highlight-color: transparent;
@@ -113,6 +147,7 @@
 .calendar-day:hover,
 .calendar-day:focus-visible {
   background: var(--day-hover);
+  transform: scale(1.05);
 }
 
 .calendar-day--empty {
@@ -124,11 +159,12 @@
 
 .calendar-day--empty:hover {
   background: transparent;
+  transform: none;
 }
 
 .calendar-day--today {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--primary);
+  outline: none;
 }
 
 .calendar-day--has-entries {
@@ -156,7 +192,9 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 100;
   display: flex;
   align-items: flex-end;
@@ -166,12 +204,12 @@
 
 .modal-panel {
   background: var(--card-bg);
-  border-radius: 20px 20px 0 0;
+  border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 480px;
   max-height: 85vh;
   overflow: auto;
-  box-shadow: 0 -4px 24px var(--shadow);
+  box-shadow: 0 -8px 32px var(--shadow-soft), 0 -2px 8px var(--shadow);
 }
 
 .day-detail {
@@ -201,13 +239,28 @@
   color: var(--text);
   font-size: 1.5rem;
   line-height: 1;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .day-detail-close:hover {
   background: var(--btn-hover);
+  transform: scale(1.05);
+}
+
+.day-detail-close-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.day-detail-close-icon svg {
+  display: block;
 }
 
 .day-detail-empty {
@@ -226,10 +279,15 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   background: var(--day-bg);
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.day-detail-item:hover {
+  border-color: var(--border);
 }
 
 .day-detail-item-main {
@@ -293,7 +351,7 @@
   padding: 0.75rem 1rem;
   font-size: 1rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--input-bg);
   color: var(--text);
   box-sizing: border-box;
@@ -325,7 +383,7 @@
   color: var(--text);
   font-size: 1.125rem;
   font-weight: 600;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -339,6 +397,7 @@
   border-color: var(--primary);
   background: var(--primary);
   color: var(--bg);
+  box-shadow: 0 2px 8px var(--primary-alpha);
 }
 
 .mood-hint {
@@ -365,7 +424,7 @@
   font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -373,10 +432,12 @@
 .btn-primary {
   background: var(--primary);
   color: white;
+  box-shadow: 0 2px 12px var(--primary-alpha);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
+  box-shadow: 0 4px 16px var(--primary-alpha);
 }
 
 .btn-secondary {
@@ -398,12 +459,13 @@
   padding: 0;
   background: var(--btn-bg);
   color: var(--text);
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 1.125rem;
 }
 
 .btn-icon:hover {
   background: var(--btn-hover);
+  transform: scale(1.05);
 }
 
 .btn-danger:hover {

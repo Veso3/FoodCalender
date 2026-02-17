@@ -9,10 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Essens-Kalender',
-        short_name: 'Essens-Kalender',
+        name: 'Medos Essens-Kalender',
+        short_name: 'Medos Essens-Kalender',
         description: 'Kalender für Essen und Wohlbefinden',
-        theme_color: '#1a472a',
+        theme_color: '#5C2424',
         background_color: '#0f1419',
         display: 'standalone',
         orientation: 'portrait',
