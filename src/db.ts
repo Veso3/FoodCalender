@@ -63,16 +63,16 @@ export async function addEntry(entry: Entry): Promise<void> {
 }
 
 export async function updateEntry(entry: Entry): Promise<void> {
-  await apiFetch('/api/entries', {
+  await apiFetch('/api/entries/update', {
     method: 'POST',
-    body: JSON.stringify({ action: 'update', ...entry }),
+    body: JSON.stringify(entry),
   });
 }
 
 export async function deleteEntry(id: string): Promise<void> {
-  await apiFetch('/api/entries', {
+  await apiFetch('/api/entries/delete', {
     method: 'POST',
-    body: JSON.stringify({ action: 'delete', id }),
+    body: JSON.stringify({ id }),
   });
 }
 
