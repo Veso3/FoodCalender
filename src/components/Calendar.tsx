@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { toDateKey } from '../dateUtils';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const MONTHS = [
@@ -23,10 +24,6 @@ function getCalendarGrid(year: number, month: number): (Date | null)[] {
   for (let i = 0; i < startDow; i++) grid.push(null);
   for (const d of days) grid.push(d);
   return grid;
-}
-
-function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
 }
 
 interface CalendarProps {

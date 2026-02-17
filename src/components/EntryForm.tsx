@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Entry, MoodLevel } from '../types';
 import { MOOD_LABELS } from '../types';
+import { toDateKey } from '../dateUtils';
 
 interface EntryFormProps {
   initialDate: Date;
@@ -9,17 +10,13 @@ interface EntryFormProps {
   onCancel: () => void;
 }
 
-function toDateInputValue(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
 export default function EntryForm({
   initialDate,
   entry,
   onSave,
   onCancel,
 }: EntryFormProps) {
-  const [date, setDate] = useState(toDateInputValue(initialDate));
+  const [date, setDate] = useState(toDateKey(initialDate));
   const [time, setTime] = useState('');
   const [food, setFood] = useState('');
   const [mood, setMood] = useState<MoodLevel>(3);

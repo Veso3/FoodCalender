@@ -10,11 +10,8 @@ import {
   updateEntry as dbUpdateEntry,
   deleteEntry as dbDeleteEntry,
 } from './db';
+import { toDateKey } from './dateUtils';
 import './App.css';
-
-function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
 
 export default function App() {
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
