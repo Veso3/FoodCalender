@@ -26,11 +26,7 @@ function entryFromRow(row: { id: string; date: string; time: string | null; food
   };
 }
 
-export async function OPTIONS(): Promise<Response> {
-  return new Response(null, { status: 204, headers: corsHeaders() });
-}
-
-export async function GET(request: Request): Promise<Response> {
+async function handleGet(request: Request): Promise<Response> {
   const id = getIdFromRequest(request);
   if (!id) return errorResponse('Missing id', 400);
   try {
@@ -46,7 +42,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 }
 
-export async function PUT(request: Request): Promise<Response> {
+async function handlePut(request: Request): Promise<Response> {
   const id = getIdFromRequest(request);
   if (!id) return errorResponse('Missing id', 400);
   try {
@@ -67,7 +63,7 @@ export async function PUT(request: Request): Promise<Response> {
   }
 }
 
-export async function DELETE(request: Request): Promise<Response> {
+async function handleDelete(request: Request): Promise<Response> {
   const id = getIdFromRequest(request);
   if (!id) return errorResponse('Missing id', 400);
   try {
@@ -81,3 +77,15 @@ export async function DELETE(request: Request): Promise<Response> {
     return errorResponse(e instanceof Error ? e.message : 'Server error', 500);
   }
 }
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
+    if (request.method === 'GET') return handleGet(request);
+    if (request.method === 'PUT') return handlePut(request);
+    if (request.method === 'DELETE') return handleDelete(request);
+    return new Response(null, { status: 405, headers: corsHeaders() });
+  },
+};
