@@ -1,5 +1,5 @@
-import { ensureTable, getSql } from '../lib/db';
-import { jsonResponse, errorResponse, corsHeaders } from '../lib/cors';
+import { ensureTable, getSql } from '../lib/db.js';
+import { jsonResponse, errorResponse, corsHeaders } from '../lib/cors.js';
 
 interface Entry {
   id: string;
