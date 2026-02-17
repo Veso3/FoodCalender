@@ -321,6 +321,7 @@
 .day-detail-item-actions .btn-icon {
   position: relative;
   z-index: 1;
+  touch-action: manipulation;
 }
 
 .day-detail-add {

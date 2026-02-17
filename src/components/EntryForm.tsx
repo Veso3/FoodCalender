@@ -32,8 +32,7 @@ export default function EntryForm({
     }
   }, [entry]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const doSave = () => {
     const payload: Entry = {
       id: entry?.id ?? crypto.randomUUID(),
       date,
@@ -42,6 +41,11 @@ export default function EntryForm({
       mood,
     };
     onSave(payload);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    doSave();
   };
 
   return (
@@ -104,7 +108,18 @@ export default function EntryForm({
         <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>
           Abbrechen
         </button>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={saving}
+          onPointerDown={(e) => {
+            if (saving) return;
+            e.preventDefault();
+            e.stopPropagation();
+            doSave();
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           {saving ? 'Speichern…' : 'Speichern'}
         </button>
       </div>
