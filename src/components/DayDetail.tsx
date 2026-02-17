@@ -64,6 +64,11 @@ export default function DayDetail({
                   <button
                     type="button"
                     className="btn btn-icon"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onEditEntry(entry);
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onEditEntry(entry);
@@ -75,6 +80,11 @@ export default function DayDetail({
                   <button
                     type="button"
                     className="btn btn-icon btn-danger"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDeleteEntry(entry.id);
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteEntry(entry.id);

@@ -117,7 +117,13 @@ export default function App() {
       </main>
 
       {selectedDate && (
-        <div className="modal-backdrop" onClick={handleCloseDay} aria-hidden>
+        <div
+          className="modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCloseDay();
+          }}
+          aria-hidden
+        >
           <div
             className="modal-panel day-detail-panel"
             onClick={(e) => e.stopPropagation()}
