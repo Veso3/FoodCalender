@@ -8,6 +8,7 @@ interface EntryFormProps {
   entry?: Entry | null;
   onSave: (entry: Entry) => void;
   onCancel: () => void;
+  saving?: boolean;
 }
 
 export default function EntryForm({
@@ -15,6 +16,7 @@ export default function EntryForm({
   entry,
   onSave,
   onCancel,
+  saving = false,
 }: EntryFormProps) {
   const [date, setDate] = useState(toDateKey(initialDate));
   const [time, setTime] = useState('');
@@ -99,11 +101,11 @@ export default function EntryForm({
         <span className="mood-hint">{MOOD_LABELS[mood]}</span>
       </div>
       <div className="entry-form-actions">
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+        <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>
           Abbrechen
         </button>
-        <button type="submit" className="btn btn-primary">
-          Speichern
+        <button type="submit" className="btn btn-primary" disabled={saving}>
+          {saving ? 'Speichern…' : 'Speichern'}
         </button>
       </div>
     </form>
