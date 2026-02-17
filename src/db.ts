@@ -1,35 +1,33 @@
-import { openDB, type IDBPDatabase } from 'idb';
 import type { Entry } from './types';
 
-const DB_NAME = 'essens-kalender-db';
-const STORE_NAME = 'entries';
-const DB_VERSION = 1;
+const API_BASE = (import.meta.env.VITE_API_URL as string) ?? '';
 
-let dbPromise: Promise<IDBPDatabase<{ entries: Entry }>> | null = null;
-
-function getDB() {
-  if (!dbPromise) {
-    dbPromise = openDB<{ entries: Entry }>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          store.createIndex('by-date', 'date');
-        }
-      },
-    });
+async function apiFetch(path: string, options?: RequestInit): Promise<Response> {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+  if (!res.ok && res.status !== 404) {
+    throw new Error(await res.text().catch(() => `HTTP ${res.status}`));
   }
-  return dbPromise;
+  return res;
 }
 
 export async function getAllEntries(): Promise<Entry[]> {
-  const db = await getDB();
-  return db.getAll(STORE_NAME);
+  const res = await apiFetch('/api/entries');
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getEntriesByDate(date: string): Promise<Entry[]> {
-  const db = await getDB();
-  const all = await db.getAllFromIndex(STORE_NAME, 'by-date', date);
-  return all.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  const res = await apiFetch(`/api/entries?date=${encodeURIComponent(date)}`);
+  const data = await res.json();
+  const entries = Array.isArray(data) ? data : [];
+  return entries.sort((a: Entry, b: Entry) => (a.time || '').localeCompare(b.time || ''));
 }
 
 export async function getDatesWithEntries(): Promise<Set<string>> {
@@ -38,18 +36,23 @@ export async function getDatesWithEntries(): Promise<Set<string>> {
 }
 
 export async function addEntry(entry: Entry): Promise<void> {
-  const db = await getDB();
-  await db.put(STORE_NAME, entry);
+  await apiFetch('/api/entries', {
+    method: 'POST',
+    body: JSON.stringify(entry),
+  });
 }
 
 export async function updateEntry(entry: Entry): Promise<void> {
-  const db = await getDB();
-  await db.put(STORE_NAME, entry);
+  await apiFetch(`/api/entries/${encodeURIComponent(entry.id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(entry),
+  });
 }
 
 export async function deleteEntry(id: string): Promise<void> {
-  const db = await getDB();
-  await db.delete(STORE_NAME, id);
+  await apiFetch(`/api/entries/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 }
 
 export function generateId(): string {
