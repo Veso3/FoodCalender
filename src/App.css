@@ -315,6 +315,12 @@
 .day-detail-item-actions {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
+}
+
+.day-detail-item-actions .btn-icon {
+  position: relative;
+  z-index: 1;
 }
 
 .day-detail-add {

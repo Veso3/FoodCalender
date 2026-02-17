@@ -64,7 +64,10 @@ export default function DayDetail({
                   <button
                     type="button"
                     className="btn btn-icon"
-                    onClick={() => onEditEntry(entry)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditEntry(entry);
+                    }}
                     aria-label="Bearbeiten"
                   >
                     ✎
@@ -72,7 +75,10 @@ export default function DayDetail({
                   <button
                     type="button"
                     className="btn btn-icon btn-danger"
-                    onClick={() => onDeleteEntry(entry.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteEntry(entry.id);
+                    }}
                     aria-label="Löschen"
                   >
                     🗑
@@ -85,7 +91,10 @@ export default function DayDetail({
         <button
           type="button"
           className="btn btn-primary btn-block day-detail-add"
-          onClick={onAddEntry}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddEntry();
+          }}
         >
           + Eintrag hinzufügen
         </button>
