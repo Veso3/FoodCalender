@@ -208,7 +208,10 @@
   width: 100%;
   max-width: 480px;
   max-height: 85vh;
+  max-height: min(85vh, 85dvh);
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -8px 32px var(--shadow-soft), 0 -2px 8px var(--shadow);
 }
 
@@ -423,6 +426,24 @@
 .entry-form-actions .btn {
   flex: 1;
   min-height: 48px;
+}
+
+@media (max-width: 380px) {
+  .mood-buttons {
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .entry-form {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .entry-form-actions {
+    flex-direction: column;
+  }
 }
 
 /* Buttons */
