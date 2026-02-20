@@ -1,4 +1,5 @@
-import type { Entry } from '../types';
+import { useState, useEffect } from 'react';
+import type { Entry, NightPain } from '../types';
 import { MOOD_LABELS } from '../types';
 
 const MONTHS = [
@@ -9,6 +10,8 @@ const MONTHS = [
 interface DayDetailProps {
   date: Date;
   entries: Entry[];
+  nightPain: NightPain | null;
+  onSaveNightPain: (data: { pain: boolean; notes: string }) => void;
   onAddEntry: () => void;
   onEditEntry: (entry: Entry) => void;
   onDeleteEntry: (id: string) => void;
@@ -22,11 +25,30 @@ function formatDate(d: Date): string {
 export default function DayDetail({
   date,
   entries,
+  nightPain,
+  onSaveNightPain,
   onAddEntry,
   onEditEntry,
   onDeleteEntry,
   onClose,
 }: DayDetailProps) {
+  const [pain, setPain] = useState(nightPain?.pain ?? false);
+  const [notes, setNotes] = useState(nightPain?.notes ?? '');
+
+  useEffect(() => {
+    setPain(nightPain?.pain ?? false);
+    setNotes(nightPain?.notes ?? '');
+  }, [nightPain?.pain, nightPain?.notes]);
+
+  const handlePainChange = (value: boolean) => {
+    setPain(value);
+    onSaveNightPain({ pain: value, notes });
+  };
+
+  const handleNotesBlur = () => {
+    onSaveNightPain({ pain, notes });
+  };
+
   return (
     <div className="day-detail" role="dialog" aria-modal="true" aria-label={`Einträge für ${formatDate(date)}`}>
       <header className="day-detail-header">
@@ -98,6 +120,36 @@ export default function DayDetail({
             ))}
           </ul>
         )}
+        <section className="night-pain-block" aria-labelledby="night-pain-label">
+          <h4 id="night-pain-label" className="night-pain-label">Schmerzen in der Nacht</h4>
+          <div className="mood-buttons night-pain-buttons">
+            <button
+              type="button"
+              className={`mood-btn ${pain ? 'mood-btn--active' : ''}`}
+              onClick={() => handlePainChange(true)}
+            >
+              Ja
+            </button>
+            <button
+              type="button"
+              className={`mood-btn ${!pain ? 'mood-btn--active' : ''}`}
+              onClick={() => handlePainChange(false)}
+            >
+              Nein
+            </button>
+          </div>
+          <label className="entry-form-row" style={{ marginTop: '0.75rem' }}>
+            <span className="entry-form-label">Notizen</span>
+            <textarea
+              className="entry-form-input entry-form-textarea"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={handleNotesBlur}
+              placeholder="Optional"
+              rows={2}
+            />
+          </label>
+        </section>
         <button
           type="button"
           className="btn btn-primary btn-block day-detail-add"

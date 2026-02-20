@@ -15,3 +15,9 @@ export const MOOD_LABELS: Record<MoodLevel, string> = {
   4: 'Gut',
   5: 'Sehr gut',
 };
+
+export interface NightPain {
+  date: string;
+  pain: boolean;
+  notes: string;
+}

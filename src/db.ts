@@ -1,4 +1,4 @@
-import type { Entry } from './types';
+import type { Entry, NightPain } from './types';
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) ?? '';
 
@@ -78,4 +78,28 @@ export async function deleteEntry(id: string): Promise<void> {
 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export async function getNightPain(date: string): Promise<NightPain | null> {
+  try {
+    const res = await apiFetch(`/api/night-pain?date=${encodeURIComponent(date)}`);
+    if (res.status === 404) return null;
+    const data = await parseJsonResponse(res);
+    if (data && typeof data === 'object' && 'date' in data && 'pain' in data) {
+      const d = data as { date: string; pain: boolean; notes?: string };
+      return { date: d.date, pain: d.pain, notes: d.notes ?? '' };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveNightPain(payload: NightPain): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/night-pain`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await res.text().catch(() => `HTTP ${res.status}`));
 }

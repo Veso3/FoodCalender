@@ -9,7 +9,7 @@ function getSql() {
   return neon(connectionString);
 }
 
-const INIT_SQL = `
+const ENTRIES_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS entries (
     id TEXT PRIMARY KEY,
     date TEXT NOT NULL,
@@ -19,12 +19,21 @@ const INIT_SQL = `
   );
 `;
 
+const NIGHT_PAIN_TABLE_SQL = `
+  CREATE TABLE IF NOT EXISTS night_pain (
+    date TEXT PRIMARY KEY,
+    pain BOOLEAN NOT NULL,
+    notes TEXT
+  );
+`;
+
 let initDone = false;
 
 export async function ensureTable(): Promise<void> {
   if (initDone) return;
   const sql = getSql();
-  await sql.query(INIT_SQL);
+  await sql.query(ENTRIES_TABLE_SQL);
+  await sql.query(NIGHT_PAIN_TABLE_SQL);
   initDone = true;
 }
 

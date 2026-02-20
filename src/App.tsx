@@ -2,10 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import Calendar from './components/Calendar';
 import DayDetail from './components/DayDetail';
 import EntryForm from './components/EntryForm';
-import type { Entry } from './types';
+import type { Entry, NightPain } from './types';
 import {
   getDatesWithEntries,
   getEntriesByDate,
+  getAllEntries,
+  getNightPain,
+  saveNightPain,
   addEntry as dbAddEntry,
   updateEntry as dbUpdateEntry,
   deleteEntry as dbDeleteEntry,
@@ -21,6 +24,7 @@ export default function App() {
   const [formState, setFormState] = useState<'closed' | 'new' | { edit: Entry }>('closed');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [nightPain, setNightPain] = useState<NightPain | null>(null);
 
   const refreshDates = useCallback(async () => {
     const set = await getDatesWithEntries();
@@ -34,10 +38,12 @@ export default function App() {
   useEffect(() => {
     if (!selectedDate) {
       setDayEntries([]);
+      setNightPain(null);
       return;
     }
     const key = toDateKey(selectedDate);
     getEntriesByDate(key).then(setDayEntries);
+    getNightPain(key).then(setNightPain);
   }, [selectedDate]);
 
   const handleSelectDay = (date: Date) => {
@@ -81,6 +87,7 @@ export default function App() {
   };
 
   const handleDeleteEntry = async (id: string) => {
+    if (!window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')) return;
     setErrorMessage(null);
     try {
       await dbDeleteEntry(id);
@@ -92,6 +99,45 @@ export default function App() {
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : 'Fehler beim Löschen.');
     }
+  };
+
+  const handleSaveNightPain = async (data: { pain: boolean; notes: string }) => {
+    if (!selectedDate) return;
+    const date = toDateKey(selectedDate);
+    try {
+      await saveNightPain({ date, pain: data.pain, notes: data.notes });
+      setNightPain({ date, pain: data.pain, notes: data.notes });
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Fehler beim Speichern.');
+    }
+  };
+
+  const handleExportMonth = async () => {
+    const year = currentMonth.getFullYear();
+    const month = (currentMonth.getMonth() + 1).toString().padStart(2, '0');
+    const prefix = `${year}-${month}`;
+    const all = await getAllEntries();
+    const entries = all
+      .filter((e) => e.date.startsWith(prefix))
+      .sort((a, b) => {
+        const d = a.date.localeCompare(b.date);
+        return d !== 0 ? d : (a.time || '').localeCompare(b.time || '');
+      });
+    const lines = entries.map((e) => {
+      const [y, m, d] = e.date.split('-');
+      const dateStr = `${d}.${m}.${y}`;
+      const timeStr = e.time || '--:--';
+      const moodStr = '★'.repeat(e.mood) + '☆'.repeat(5 - e.mood);
+      return `${dateStr} ${timeStr} | ${e.food} | Stimmung ${e.mood}/5 ${moodStr}`;
+    });
+    const text = lines.length ? lines.join('\n') : `Keine Einträge für ${currentMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}.`;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Medos-Essens-Kalender-${year}-${month}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const formDate = selectedDate ?? new Date();
@@ -114,6 +160,13 @@ export default function App() {
           onSelectDay={handleSelectDay}
           datesWithEntries={datesWithEntries}
         />
+        <button
+          type="button"
+          className="btn btn-secondary btn-block app-export"
+          onClick={handleExportMonth}
+        >
+          Export (aktueller Monat)
+        </button>
       </main>
 
       {selectedDate && (
@@ -153,6 +206,8 @@ export default function App() {
               <DayDetail
                 date={selectedDate}
                 entries={dayEntries}
+                nightPain={nightPain}
+                onSaveNightPain={handleSaveNightPain}
                 onAddEntry={handleOpenNewEntry}
                 onEditEntry={handleEditEntry}
                 onDeleteEntry={handleDeleteEntry}

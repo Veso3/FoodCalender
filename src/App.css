@@ -32,6 +32,10 @@
   margin: 0 auto;
 }
 
+.app-export {
+  margin-top: 1rem;
+}
+
 .app-error {
   display: flex;
   align-items: center;
@@ -325,6 +329,29 @@
   position: relative;
   z-index: 1;
   touch-action: manipulation;
+}
+
+.night-pain-block {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--day-bg);
+  border-radius: 14px;
+  border: 1px solid transparent;
+}
+
+.night-pain-block:hover {
+  border-color: var(--border);
+}
+
+.night-pain-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.night-pain-buttons {
+  margin-top: 0;
 }
 
 .day-detail-add {
