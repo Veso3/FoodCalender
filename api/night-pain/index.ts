@@ -10,8 +10,24 @@ export async function GET(request: Request): Promise<Response> {
     await ensureTable();
     const url = new URL(request.url);
     const date = url.searchParams.get('date');
-    if (!date) return errorResponse('Missing date', 400);
+    const month = url.searchParams.get('month');
     const sql = getSql();
+
+    if (month) {
+      const prefix = `${month}-`;
+      const rows = await sql.query(
+        'SELECT date, pain, notes FROM night_pain WHERE date LIKE $1 ORDER BY date',
+        [prefix + '%']
+      );
+      const list = Array.isArray(rows) ? rows : [];
+      const result = list.map((r) => {
+        const row = r as { date: string; pain: boolean; notes: string | null };
+        return { date: row.date, pain: row.pain, notes: row.notes ?? '' };
+      });
+      return jsonResponse(result);
+    }
+
+    if (!date) return errorResponse('Missing date or month', 400);
     const rows = await sql.query('SELECT date, pain, notes FROM night_pain WHERE date = $1', [date]);
     const row = Array.isArray(rows) ? rows[0] : null;
     if (!row) return errorResponse('Not found', 404);

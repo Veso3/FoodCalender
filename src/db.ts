@@ -80,6 +80,19 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+export async function getNightPainByMonth(month: string): Promise<NightPain[]> {
+  try {
+    const res = await apiFetch(`/api/night-pain?month=${encodeURIComponent(month)}`);
+    const data = await parseJsonResponse(res);
+    if (!Array.isArray(data)) return [];
+    return data
+      .filter((x): x is { date: string; pain: boolean; notes?: string } => x && typeof x === 'object' && 'date' in x && 'pain' in x)
+      .map((x) => ({ date: x.date, pain: x.pain, notes: x.notes ?? '' }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getNightPain(date: string): Promise<NightPain | null> {
   try {
     const res = await apiFetch(`/api/night-pain?date=${encodeURIComponent(date)}`);

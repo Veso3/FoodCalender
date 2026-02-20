@@ -8,6 +8,7 @@ import {
   getEntriesByDate,
   getAllEntries,
   getNightPain,
+  getNightPainByMonth,
   saveNightPain,
   addEntry as dbAddEntry,
   updateEntry as dbUpdateEntry,
@@ -116,21 +117,43 @@ export default function App() {
     const year = currentMonth.getFullYear();
     const month = (currentMonth.getMonth() + 1).toString().padStart(2, '0');
     const prefix = `${year}-${month}`;
-    const all = await getAllEntries();
-    const entries = all
+    const [allEntries, nightPainList] = await Promise.all([
+      getAllEntries(),
+      getNightPainByMonth(prefix),
+    ]);
+    const entries = allEntries
       .filter((e) => e.date.startsWith(prefix))
       .sort((a, b) => {
         const d = a.date.localeCompare(b.date);
         return d !== 0 ? d : (a.time || '').localeCompare(b.time || '');
       });
-    const lines = entries.map((e) => {
-      const [y, m, d] = e.date.split('-');
+    const nightPainByDate = new Map<string, NightPain>();
+    nightPainList.forEach((np) => nightPainByDate.set(np.date, np));
+    const allDates = new Set<string>([...entries.map((e) => e.date), ...nightPainByDate.keys()]);
+    const sortedDates = Array.from(allDates).sort();
+
+    const blocks: string[] = [];
+    for (const dateKey of sortedDates) {
+      const [y, m, d] = dateKey.split('-');
       const dateStr = `${d}.${m}.${y}`;
-      const timeStr = e.time || '--:--';
-      const moodStr = '★'.repeat(e.mood) + '☆'.repeat(5 - e.mood);
-      return `${dateStr} ${timeStr} | ${e.food} | Stimmung ${e.mood}/5 ${moodStr}`;
-    });
-    const text = lines.length ? lines.join('\n') : `Keine Einträge für ${currentMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}.`;
+      blocks.push(dateStr);
+      const np = nightPainByDate.get(dateKey);
+      if (np) {
+        blocks.push(`  Schmerzen in der Nacht: ${np.pain ? 'Ja' : 'Nein'}`);
+        if (np.notes.trim()) blocks.push(`  Notizen: ${np.notes.trim()}`);
+      }
+      const dayEntriesList = entries.filter((e) => e.date === dateKey);
+      for (const e of dayEntriesList) {
+        const timeStr = e.time || '--:--';
+        const moodStr = '★'.repeat(e.mood) + '☆'.repeat(5 - e.mood);
+        blocks.push(`  ${timeStr} | ${e.food} | Stimmung ${e.mood}/5 ${moodStr}`);
+      }
+      blocks.push('');
+    }
+    const text =
+      blocks.length > 0
+        ? blocks.join('\n').trimEnd()
+        : `Keine Einträge für ${currentMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}.`;
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
